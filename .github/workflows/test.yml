@@ -22,9 +22,10 @@ jobs:
 
       - name: Run Python Script
         id: runpython
-        run: python .github/scripts/test.py "${{ github.event.inputs.filename }}"
+        run: python script.py "${{ github.event.inputs.filename }}"
         continue-on-error: true
 
       - name: Check Logs
         if: failure()
-        run: echo "⚠️ Python script failed for input: ${{ github.event.inputs.filename }}. See logs above."
+        run: |
+          echo "⚠️ Python script failed for input: ${{ github.event.inputs.filename }}. See logs above."
