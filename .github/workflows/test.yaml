@@ -1,0 +1,30 @@
+name: test-actions
+
+on:
+  workflow_dispatch:
+    inputs:
+      filename:
+        description: "Enter the filename to process"
+        required: true
+        default: "config.json"
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Run Python Script
+        id: runpython
+        run: python .github/scripts/test.py "${{ github.event.inputs.filename }}"
+        continue-on-error: true
+
+      - name: Check Logs
+        if: failure()
+        run: echo "⚠️ Python script failed for input: ${{ github.event.inputs.filename }}. See logs above."
