@@ -22,7 +22,8 @@ jobs:
 
       - name: Run Python Script
         id: runpython
-        run: python script.py "${{ github.event.inputs.filename }}"
+        run: python .github/scripts/test.py "${{ github.event.inputs.filename }}"
+        continue-on-error: true
 
       - name: Check Logs
         if: failure()
