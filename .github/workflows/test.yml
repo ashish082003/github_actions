@@ -26,15 +26,15 @@ jobs:
           count=$(echo "$json" | jq '.summary.summary | length')
 
           for i in $(seq 0 $((count - 1))); do
-            path=$(echo "$json" | jq -r ".summary.summary[$i].key1")
+            key1=$(echo "$json" | jq -r ".summary.summary[$i].key1")
             key2=$(echo "$json" | jq -r ".summary.summary[$i].key2")
             key3=$(echo "$json" | jq -r ".summary.summary[$i].key3")
             key4=$(echo "$json" | jq -r ".summary.summary[$i].key4")
 
-            markdown+="\n\n#### 🔹 File: \`$path\`
-          - **key2:** $key2  
-          - **key3:** $key3  
-          - **key4:** $key4"
+              markdown+="\n\n#### 🔹 File: \`$key1\`
+            - **key2:** $key2  
+            - **key3:** $key3  
+            - **key4:** $key4"
           done
 
           echo "comment<<EOF" >> $GITHUB_OUTPUT
@@ -46,5 +46,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr comment ${{ github.event.pull_request.number }} \
-            --body "${{ steps.prepare_comment.outputs.comment }}"
+          gh pr comment ${{ github.event.pull_request.number }} --body "$markdown"
+
