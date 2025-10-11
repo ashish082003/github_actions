@@ -22,20 +22,20 @@ jobs:
         run: |
           json='${{ steps.run_script.outputs.json_output }}'
 
-          markdown="### 🧠 test jq"
+          # Correct path: .summary.summary
+          count=$(echo "$json" | jq '.summary.summary | length')
 
-          count=$(echo "$json" | jq '.summary | length')
           for i in $(seq 0 $((count - 1))); do
-            path=$(echo "$json" | jq -r ".summary[$i].key1")
-            key2=$(echo "$json" | jq -r ".summary[$i].key2")
-            aiAgentScore=$(echo "$json" | jq -r ".summary[$i].key3")
-            generalRating=$(echo "$json" | jq -r ".summary[$i].key4")
+            path=$(echo "$json" | jq -r ".summary.summary[$i].key1")
+            key2=$(echo "$json" | jq -r ".summary.summary[$i].key2")
+            key3=$(echo "$json" | jq -r ".summary.summary[$i].key3")
+            key4=$(echo "$json" | jq -r ".summary.summary[$i].key4")
 
             markdown+="\n\n#### 🔹 File: \`$path\`
-            - **key2:** $key2  
-            - **key3:** $aiAgentScore  
-            - **key4:** $key4"
-                      done
+          - **key2:** $key2  
+          - **key3:** $key3  
+          - **key4:** $key4"
+          done
 
           echo "comment<<EOF" >> $GITHUB_OUTPUT
           echo "$markdown" >> $GITHUB_OUTPUT
