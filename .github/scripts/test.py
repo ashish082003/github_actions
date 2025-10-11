@@ -1,19 +1,21 @@
-import sys
+import json
 
-def main():
-    if len(sys.argv) < 2:
-        print("No filename provided!")
-        sys.exit(1)
+test={
+  "summary": [
+    {
+      "key1": "src/main.py",
+      "key2": "modified",
+      "key3": 92,
+      "key4": "Excellent"
+    },
+    {
+      "key1": "app/routes.py",
+      "key2": "added",
+      "key3": 85,
+      "key4": "Good"
+    }
+  ]
+}
 
-    filename = sys.argv[1]
-    try:
-        if filename.endswith(".json"):
-            print(f"✅ Processing file: {filename}")
-        else:
-            raise ValueError(f"Invalid file type: {filename}")
-    except Exception as e:
-        print(f"Python Script Failed::Reason: {e}")
-        sys.exit(1)
 
-if __name__ == "__main__":
-    main()
+print(json.dumps({"summary": test}))

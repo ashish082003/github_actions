@@ -1,31 +1,50 @@
-name: test-actions
+name: Comment Summary on PR
 
 on:
-  workflow_dispatch:
-    inputs:
-      filename:
-        description: "Enter the filename to process"
-        required: true
-        default: "config.json"
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
-  run-script:
+  comment-summary:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
-      - name: Run Python Script
-        id: runpython
-        run: python .github/scripts/test.py "${{ github.event.inputs.filename }}"
-        continue-on-error: true
-
-      - name: Check Logs
-        if: failure()
+      - name: Run Python script
+        id: run_script
         run: |
-          echo "⚠️ Python script failed for input: ${{ github.event.inputs.filename }}. See logs above."
+          output=$(python .github/scripts/test.py)
+          echo "json_output=$output" >> $GITHUB_OUTPUT
+
+      - name: Prepare markdown for all summaries
+        id: prepare_comment
+        run: |
+          json='${{ steps.run_script.outputs.json_output }}'
+
+          markdown="### 🧠 test jq"
+
+          count=$(echo "$json" | jq '.summary | length')
+          for i in $(seq 0 $((count - 1))); do
+            path=$(echo "$json" | jq -r ".summary[$i].key1")
+            key2=$(echo "$json" | jq -r ".summary[$i].key2")
+            aiAgentScore=$(echo "$json" | jq -r ".summary[$i].key3")
+            generalRating=$(echo "$json" | jq -r ".summary[$i].key4")
+
+            markdown+="\n\n#### 🔹 File: \`$path\`
+            - **key2:** $key2  
+            - **key3:** $aiAgentScore  
+            - **key4:** $key4"
+                      done
+
+          echo "comment<<EOF" >> $GITHUB_OUTPUT
+          echo "$markdown" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Comment on Pull Request
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --body "${{ steps.prepare_comment.outputs.comment }}"
